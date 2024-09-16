@@ -1,0 +1,120 @@
+SELECT * FROM STUDENT_MASTER;
+DESC STUDENT_MASTER;
+SELECT * FROM USER_CONSTRAINTS WHERE TABLE_NAME LIKE '%STUDENT_MASTER%';
+
+ALTER TABLE STUDENT_MASTER ADD constraint ck_student_email check(student_email is not null);
+Select * from user_constraints where table_name = 'STUDENT_MASTER';
+Select * from user_cons_columns where table_name = 'STUDENT_MASTER';
+insert into STUDENT_MASTER 
+(    student_id                  ,student_name               ,student_email              
+    ,student_ph_no           ,student_emergency_contact    ,student_address            
+    ,student_dob               
+)
+Values 
+(    100,                         'Steven',                   'steven@gmail.com',
+      0909,                        988                        ,'xxxx',
+      sysdate
+);
+
+insert into STUDENT_MASTER 
+(    student_id                  ,student_name               ,student_email              
+    ,student_ph_no           ,student_emergency_contact    ,student_address            
+    ,student_dob               , Gender
+)
+Values 
+(    101,                         'Steven',                   'stevenii@gmail.com',
+      0909,                        988                        ,'xxxx',
+      sysdate   ,                  'M'
+);
+
+SELECT * FROM STUDENT_MASTER;
+
+CREATE TABLE STUDENT_MASTER04
+   ( STUD_ID NUMBER, 
+ STUD_NAME VARCHAR2(30), 
+ STUD_FATHER_NAME VARCHAR2(30), 
+ STUD_EMERG_CONT NUMBER, 
+ STUD_ADDRESS VARCHAR2(100), 
+ STUD_PHONE_NO NUMBER, 
+ STUD_EMAIL VARCHAR2(30), 
+ STUD_GENDER CHAR(1), 
+  CONSTRAINT PK_STUD_ID PRIMARY KEY (STUD_ID),
+  CONSTRAINT UK_PH_NO UNIQUE (STUD_PHONE_NO),
+  CONSTRAINT CHK1 CHECK ( Stud_gender IN('F', 'M')) ENABLE
+   ) ;
+insert into STUDENT_MASTER04 values(100,'stev','henry',0987,'abcd',9870,'asdf','M');
+insert into STUDENT_MASTER04 values(100,'steven','henry lawrence',09986,'abcdef',987670,'aseddf','M');--ORA-00001: unique constraint (HR.PK_STUD_ID) violated
+
+--print even number of rows from a table
+SELECT *
+FROM (
+    select e.*, ROWNUM as rn
+    from (SELECT * FROM EMPLOYEES ORDER BY employee_id)e
+)
+WHERE MOD(rn,2)=0;
+
+SELECT * FROM EMPLOYEES WHERE MOD(EMPLOYEE_ID, 10) IN (0,2,4,6,8);
+
+--changeing all column names to lower case
+SELECT 'ALTER TABLE EMPLOYEES RENAME COLUMN ' || COLUMN_NAME || ' TO ' || LOWER(COLUMN_NAME) || ';'
+FROM USER_TAB_COLUMNS
+WHERE TABLE_NAME = 'EMPLOYEES';
+
+SELECT * FROM EMPLOYEES;
+--print all even rows at first and all odd rows next
+SELECT *
+FROM (
+    SELECT 
+        e.*, 
+        ROW_NUMBER() OVER (ORDER BY EMPLOYEE_ID) AS rn
+    FROM 
+        EMPLOYEES e
+) 
+ORDER BY 
+    MOD(rn, 2), 
+    rn;
+    
+--find number of 'o' available in the word technologies--LENGTH()-LENGTH(REPLECE(TECH,'O'))
+SELECT LENGTH('technologies') - LENGTH(REPLACE('technologies','o','')) AS num_of_o FROM dual;
+
+--remove all vowels froim the word technologies 
+SELECT TRANSLATE('technologies', 'aeiouAEIOU','') AS no_vowels FROM dual;
+SELECT REPLACE(
+         REPLACE(
+           REPLACE(
+             REPLACE(
+               REPLACE('technologies', 'a', ''),
+             'e', ''),
+           'i', ''),
+         'o', ''),
+       'u', '') AS result
+FROM dual;
+
+--print next of next Sundays date
+SELECT NEXT_DAY(TRUNC(SYSDATE)+14, 'SUNDAY') AS next_of_next_sunday FROM dual;
+
+--how to print first day of the month without using trunc--LAST_DAY,ADD_MONTHS
+SELECT TO_DATE(TO_CHAR(SYSDATE, 'YYYY-MM') || '-01', 'YYYY-MM-DD') AS first_day_of_month FROM dual;
+
+--print day, month  and year in different columns 
+SELECT 
+    EXTRACT(DAY FROM SYSDATE) AS day,
+    EXTRACT(MONTH FROM SYSDATE) AS month,
+    EXTRACT(YEAR FROM SYSDATE) AS year
+FROM dual;
+
+--VAISHNAVI@CTS.COM -- VAISHNAVI AS FIRST_NAME,CTS.COM AS DOMAIN NAME
+SELECT 
+   SUBSTR(email,1, INSTR(email, '@')-1) AS first_name,
+   SUBSTR(email, INSTR(email, '@')+1) AS domain_name
+FROM(
+   SELECT 'VAISHNAVI@CTS.COM' AS email FROM dual
+   );
+   
+--00087480 -- REMOVE ONLY ZEROS IN THE LEFT
+SELECT TRIM(LEADING '0' FROM '00087480') as result FROM dual;
+
+--remove only zeroes in the right
+SELECT REGEXP_REPLACE('87480000', '0+$', '') AS result FROM dual;
+
+

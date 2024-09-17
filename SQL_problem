@@ -1,0 +1,72 @@
+--1.remove only middle * from below : ****Hello****World****
+SELECT REGEXP_REPLACE('****Hello****World****', '(\*\*\*\*)Hello\1World\1', '\1HelloWorld\1') AS result
+FROM dual;
+
+--2. Print Next sunday 
+SELECT NEXT_DAY(SYSDATE, 'SUNDAY') AS next_sunday FROM dual;
+
+--3.Print first day of month
+SELECT TRUNC(SYSDATE, 'MONTH') AS first_day_of_month
+FROM dual;
+
+--4. Print date , month, year in different columns from sysdate. 
+SELECT 
+    EXTRACT(DAY FROM SYSDATE) AS day,
+    EXTRACT(MONTH FROM SYSDATE) AS month,
+    EXTRACT(YEAR FROM SYSDATE) AS year
+FROM dual;
+
+--5.Generate numbers from 1 to 10 (pending)
+SELECT LEVEL FROM DUAL CONNECT BY <= 10;
+
+Begin
+  For i in 1..10
+  Loop
+    dbms_output.put_line(i);
+  End loop;
+End;
+/
+
+--6. Generate next 5 days and print the dates. 
+SELECT SYSDATE + LEVEL - 1 AS Next_Day
+FROM dual
+CONNECT BY LEVEL <= 5;
+
+SELECT SYSDATE + LEVEL AS Next_Day
+FROM dual
+CONNECT BY LEVEL <= 5;
+
+--7. Print Odd number of rows from a table. 
+SELECT *
+FROM (
+    select e.*, ROWNUM as rn
+    from (SELECT * FROM EMPLOYEES ORDER BY employee_id)e
+)
+WHERE MOD(rn,2)=0;
+
+SELECT *
+FROM (
+    SELECT EMPLOYEES.*, ROW_NUMBER() OVER (ORDER BY employee_id) AS rn
+    FROM EMPLOYEES
+) 
+WHERE MOD(rn, 2) = 0;
+
+--8. Print even number of rows from a Table.
+SELECT *
+FROM (
+    SELECT EMPLOYEES.*, ROW_NUMBER() OVER (ORDER BY employee_id) AS rn
+    FROM EMPLOYEES
+) 
+WHERE MOD(rn, 2) = 1;
+
+--9.  print first 3 rows from a table
+SELECT * FROM EMPLOYEES where ROWNUM <= 3;
+
+--10. print last 3 rows from table 
+SELECT * 
+FROM (
+    SELECT * 
+    FROM EMPLOYEES
+    ORDER BY EMPLOYEE_ID DESC
+) 
+WHERE ROWNUM <= 3 ORDER BY EMPLOYEE_ID;

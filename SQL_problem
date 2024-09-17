@@ -70,3 +70,76 @@ FROM (
     ORDER BY EMPLOYEE_ID DESC
 ) 
 WHERE ROWNUM <= 3 ORDER BY EMPLOYEE_ID;
+
+--13.  print department wise employees count
+SELECT d.DEPARTMENT_NAME, COUNT(e.EMPLOYEE_ID) AS employee_count FROM DEPARTMENTS d
+LEFT JOIN EMPLOYEES e ON d.DEPARTMENT_ID = e.DEPARTMENT_ID 
+GROUP BY d.DEPARTMENT_NAME ORDER BY employee_count DESC;
+
+SELECT DISTINCT
+    d.DEPARTMENT_NAME,
+    COUNT(e.EMPLOYEE_ID) OVER (PARTITION BY d.DEPARTMENT_ID) AS EMPLOYEE_COUNT
+FROM DEPARTMENTS d
+LEFT JOIN EMPLOYEES e ON d.DEPARTMENT_ID = e.DEPARTMENT_ID
+ORDER BY EMPLOYEE_COUNT DESC;
+
+--14. print 3 rd maximum salary  with using analytical function and without using analytical function 
+SELECT MIN(SALARY)AS third_max_salary
+FROM (
+     SELECT DISTINCT SALARY FROM EMPLOYEES ORDER BY SALARY DESC
+     ) WHERE ROWNUM <= 3;
+     
+--14.2.ALTERNATIVE METHOD USING ANALYTICAL FUNCTION
+SELECT SALARY
+FROM (
+     SELECT SALARY, DENSE_RANK() OVER (ORDER BY SALARY DESC) AS salary_rank
+     FROM EMPLOYEES
+)WHERE salary_rank = 3;
+
+--15.  print 3 rd minimum salary
+SELECT MIN(SALARY) AS third_minimum_salary
+FROM (
+    SELECT DISTINCT SALARY FROM EMPLOYEES ORDER BY SALARY ASC
+) 
+WHERE ROWNUM <= 3;
+
+--16.print maximum salary from each department.
+SELECT DEPARTMENT_ID, MAX(SALARY) FROM EMPLOYEES GROUP BY DEPARTMENT_ID;
+
+SELECT e.DEPARTMENT_ID, d.DEPARTMENT_NAME, MAX(e.SALARY) AS maximum_salary FROM EMPLOYEES e
+JOIN DEPARTMENTS d ON e.DEPARTMENT_ID = d.DEPARTMENT_ID 
+GROUP BY d.DEPARTMENT_NAME, e.DEPARTMENT_ID ORDER BY maximum_salary DESC;
+
+--17.print middle record from the table
+--17.1. 
+WITH OrderedSalaries AS (
+    SELECT 
+        SALARY,
+        ROW_NUMBER() OVER (ORDER BY SALARY) AS rn,
+        COUNT(*) OVER () AS total_count
+    FROM 
+        EMPLOYEES
+)
+SELECT 
+    SALARY
+FROM 
+    OrderedSalaries
+WHERE 
+    rn = CEIL(total_count / 2);
+
+--17.2.   
+WITH NumberedRows AS (
+    SELECT 
+        SALARY,
+        ROW_NUMBER() OVER (ORDER BY SALARY) AS rn,
+        COUNT(*) OVER () AS total_count
+    FROM 
+        EMPLOYEES
+)
+SELECT 
+    SALARY
+FROM 
+    NumberedRows
+WHERE 
+    rn = FLOOR((total_count + 1) / 2);
+

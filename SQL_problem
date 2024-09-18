@@ -143,3 +143,40 @@ FROM
 WHERE 
     rn = FLOOR((total_count + 1) / 2);
 
+--18.  print n th record of the table.
+SELECT * 
+FROM (SELECT * FROM EMPLOYEES ORDER BY EMPLOYEE_ID DESC) 
+WHERE ROWNUM = 1;
+
+SELECT *
+FROM (
+     SELECT e.*, ROW_NUMBER() OVER(ORDER BY EMPLOYEE_ID DESC) AS rn
+     FROM EMPLOYEES e
+)
+WHERE rn = 1;
+
+--19.print duplicate records from the table (with and without using analytical functions) 
+ SELECT DISTINCT EMPLOYEE_ID FROM EMPLOYEES;
+ --19.1. WITHOUT USING ANALYTICAL FUNCTION
+ SELECT FIRST_NAME, LAST_NAME, COUNT(*) AS duplicate_count
+ FROM EMPLOYEES
+ GROUP BY FIRST_NAME, LAST_NAME
+ HAVING COUNT(*) > 1;
+
+--19.2. WITH ANALYTICAL FUNCTION
+SELECT * 
+FROM (
+     SELECT e.*, ROW_NUMBER() OVER (PARTITION BY FIRST_NAME, LAST_NAME ORDER BY EMPLOYEE_ID) AS rn
+     FROM EMPLOYEES e
+     )
+WHERE rn > 1;
+
+--20. delete duplicate records from the table
+DELETE FROM EMPLOYEES
+WHERE employee_id IN(
+        SELECT EMPLOYEE_ID FROM (
+              SELECT EMPLOYEE_ID, ROW_NUMBER() OVER(PARTITION BY FIRST_NAME, LAST_NAME ORDER BY employee_id) AS rn
+              FROM EMPLOYEES 
+              ) 
+        WHERE rn>1
+);              

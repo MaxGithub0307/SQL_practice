@@ -179,4 +179,45 @@ WHERE employee_id IN(
               FROM EMPLOYEES 
               ) 
         WHERE rn>1
-);              
+); 
+
+--21. scenario.
+CREATE TABLE employees_a(
+      emp_id NUMBER PRIMARY KEY,
+      emp_name VARCHAR2(100)
+      );
+      
+INSERT INTO employees_a(emp_id, emp_name) VALUES (1,'X');
+INSERT INTO employees_a(emp_id, emp_name) VALUES (2,'Y');
+INSERT INTO employees_a(emp_id, emp_name) VALUES (3,'Z');
+
+
+      
+CREATE TABLE emp_detail_a(
+      emp_id NUMBER,
+      adddress VARCHAR2(100)
+      );
+
+
+INSERT INTO emp_detail_a(emp_id, adddress) VALUES (1, 'addr1');
+INSERT INTO emp_detail_a(emp_id, adddress) VALUES (2, 'addr2');
+INSERT INTO emp_detail_a(emp_id, adddress) VALUES (1, 'addr3');
+INSERT INTO emp_detail_a(emp_id, adddress) VALUES (2, 'addr4');
+INSERT INTO emp_detail_a(emp_id, adddress) VALUES (3, 'addr5');
+
+--22. print Empid , empname From above table who are all having multiple addresses 
+SELECT e.emp_id, e.emp_name 
+FROM employees_a e
+JOIN emp_detail_a d ON e.emp_id = d.emp_id
+GROUP BY e.emp_id, e.emp_name 
+HAVING COUNT(d.adddress) > 1;
+
+--23. print Empid , empname From above table who are all having single address. 
+SELECT e.emp_id, e.emp_name 
+FROM employees_a e
+JOIN emp_detail_a d ON e.emp_id = d.emp_id
+GROUP BY e.emp_id, e.emp_name 
+HAVING COUNT(d.adddress) = 1;
+
+--24. Table t1 having records from 1 to 10, But some of records are missing from T1  Print missing records from t1.
+

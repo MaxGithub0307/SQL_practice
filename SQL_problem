@@ -220,4 +220,67 @@ GROUP BY e.emp_id, e.emp_name
 HAVING COUNT(d.adddress) = 1;
 
 --24. Table t1 having records from 1 to 10, But some of records are missing from T1  Print missing records from t1.
+--25.Print first_name, department_name , city From  Employees , departments, locations Tables 
+SELECT e.FIRST_NAME, d.DEPARTMENT_NAME, l.CITY FROM EMPLOYEES e
+JOIN DEPARTMENTS d ON e.DEPARTMENT_ID = d.DEPARTMENT_ID
+JOIN LOCATIONS l ON l.LOCATION_ID = d.LOCATION_ID;
+
+
+SELECT column_name 
+FROM all_tab_columns 
+WHERE table_name = 'LOCATIONS';
+
+--26.Print Employee details Who are all getting salary more than avg of salary from their own department
+SELECT e.DEPARTMENT_ID, e.EMPLOYEE_ID, e.FIRST_NAME, e.LAST_NAME
+FROM EMPLOYEES e
+WHERE SALARY > (
+      SELECT AVG(e1.SALARY) FROM EMPLOYEES e1
+      WHERE e1.DEPARTMENT_ID = e.DEPARTMENT_ID);
+
+--27.  Print inner join, left outer, right outer , full outer , and cross join output of these tables
+CREATE TABLE t1(
+       a NUMBER
+       );
+       
+CREATE TABLE t2(
+       b NUMBER
+       );
+       
+INSERT INTO t1 (a) VALUES (1);
+INSERT INTO t1 (a) VALUES (2);
+INSERT INTO t1 (a) VALUES (3);
+INSERT INTO t1 (a) VALUES (4);
+INSERT INTO t1 (a) VALUES (5);
+INSERT INTO t2 (b) VALUES (3);
+INSERT INTO t2 (b) VALUES (4);
+INSERT INTO t2 (b) VALUES (5);
+INSERT INTO t2 (b) VALUES (6);
+
+--inner join
+SELECT t1.a, t2.b FROM t1
+INNER JOIN t2 ON t1.a = t2.b;
+--left join
+SELECT t1.a, t2.b FROM t1
+LEFT JOIN t2 ON t1.a = t2.b;
+--Right Join
+SELECT t1.a, t2.b FROM t1
+RIGHT JOIN t2 ON t1.a = t2.b;
+--full outer join
+SELECT t1.a, t2.b FROM t1
+FULL OUTER JOIN t2 ON t1.a = t2.b;
+--CROSS JOIN
+SELECT t1.a, t2.b FROM t1
+CROSS JOIN t2;
+
+--28.  I have to insert records to t2 from t1 , But That insert statement should not insert duplicates. 
+INSERT INTO t2 (b)
+SELECT a
+FROM t1
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM t2
+    WHERE t2.b = t1.a
+);
+select * from t2;
+
 

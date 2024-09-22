@@ -283,4 +283,299 @@ WHERE NOT EXISTS (
 );
 select * from t2;
 
+--29.  I have to delete records from t1 which are not available in t2 (3 methods of output required) 
+DELETE FROM t1 
+WHERE NOT EXISTS(
+      SELECT 1 FROM t2
+      WHERE t1.a = t2.b);
+
+DELETE FROM t1
+WHERE a NOT IN (
+      SELECT b FROM t2);
+      
+DELETE FROM t1
+WHERE a IN (
+    SELECT t1.a
+    FROM t1
+    LEFT JOIN t2 ON t1.a = t2.b
+    WHERE t2.b IS NULL
+);
+
+--30. I have to insert record to t1 but it should not accept duplicates.  
+   -- eg: If i insert record 10 into t1 table, record 10 should get insert 
+--into t1 only one time , even if Im executing the insert statement multiple times. 
+ALTER TABLE t1
+ADD CONSTRAINT t1_unique_a UNIQUE(a);
+INSERT INTO t1 (a) VALUES (10);
+SELECT * FROM t1;
+
+--31. Select records from t2 which are not available in t1 (3 methods)
+ --Left join
+SELECT t2.b
+FROM t2
+LEFT JOIN t1 ON t2.b = t1.a
+WHERE t1.a IS NULL;
+
+SELECT b
+FROM t2
+WHERE b NOT IN (SELECT a FROM t1);
+
+SELECT b
+FROM t2
+WHERE NOT EXISTS (SELECT 1 FROM t1 WHERE t1.a = t2.b);
+
+--32. 
+--table3 and table4
+CREATE TABLE t3(
+       a NUMBER
+       );
+       
+CREATE TABLE t4(
+       b NUMBER
+       );
+       
+INSERT INTO t3 (a) VALUES (1);
+INSERT INTO t3 (a) VALUES (1);
+INSERT INTO t3 (a) VALUES (1);
+INSERT INTO t3 (a) VALUES (1);
+INSERT INTO t3 (a) VALUES (1);
+INSERT INTO t4 (b) VALUES (1);
+INSERT INTO t4 (b) VALUES (1);
+INSERT INTO t4 (b) VALUES (1);
+SELECT * FROM t3;
+SELECT * FROM t4;
+
+--INNER JOIN
+SELECT t3.a, t4.b
+FROM t3
+INNER JOIN t4 ON t3.a = t4.b;
+
+--LEFT JOIN
+SELECT t3.a, t4.b
+FROM t3
+LEFT JOIN t4 ON t3.a = t4.b;
+
+--RIGHT JOIN
+SELECT t3.a, t4.b
+FROM t3
+RIGHT JOIN t4 ON t3.a = t4.b;
+
+--FULL OUTER JOIN
+SELECT t3.a, t4.b
+FROM t3
+FULL OUTER JOIN t4 ON t3.a = t4.b;
+
+--full cross join
+SELECT t3.a, t4.b
+FROM t3
+CROSS JOIN t4;
+
+--33. scenario -inner, left, right, full outer, cross
+CREATE TABLE t5(
+    a NUMBER);
+
+CREATE TABLE t6(
+    b NUMBER);
+INSERT INTO t5 (a) VALUES (0); 
+INSERT INTO t5 (a) VALUES (1);
+INSERT INTO t5 (a) VALUES (1);
+
+INSERT INTO t6 (b) VALUES (1);
+INSERT INTO t6 (b) VALUES (1);
+INSERT INTO t6 (b) VALUES (0);
+
+--Inner join
+SELECT t5.a, t6.b FROM t5 
+INNER JOIN t6 ON t5.a = t6.b;
+--left join
+SELECT t5.a, t6.b
+FROM t5
+LEFT JOIN t6 ON t5.a = t6.b;
+
+--right join
+SELECT t5.a, t6.b
+FROM t5
+RIGHT JOIN t6 ON t5.a = t6.b;
+
+--full outer join
+SELECT t5.a, t6.b
+FROM t5
+FULL OUTER JOIN t6 ON t5.a = t6.b;
+
+--cross join
+SELECT t5.a, t6.b
+FROM t5
+CROSS JOIN t6;
+
+-- 34. Print employee name and his manager name in single query 
+Select e.first_name as Manager_name,e1.first_name as emp_name
+from employees e join employees e1
+on e.manager_id=e1.employee_id;
+
+--35.  update name column from  t2 with respect to id from t1 table 
+CREATE TABLE t7 (
+    id NUMBER PRIMARY KEY,
+    name VARCHAR2(50)
+);
+
+INSERT INTO t7 (id, name) VALUES (1, 'x');
+INSERT INTO t7 (id, name) VALUES (2, 'y');
+INSERT INTO t7 (id, name) VALUES (3, 'z');
+
+CREATE TABLE t8 (
+    id NUMBER PRIMARY KEY,
+    name VARCHAR2(50)
+);
+
+INSERT INTO t8 (id, name) VALUES (1, NULL);
+INSERT INTO t8 (id, name) VALUES (2, NULL);
+INSERT INTO t8 (id, name) VALUES (3, NULL);
+
+UPDATE t8
+SET t8.name = (SELECT t7.name 
+               FROM t7 
+               WHERE t7.id = t8.id)
+WHERE EXISTS (SELECT 1 
+              FROM t7 
+              WHERE t7.id = t8.id);
+
+SELECT * FROM t7;
+
+
+--36. find how many "e" available in the below word enterprise 
+SELECT LENGTH('enterprise') - LENGTH(REPLACE('enterprise', 'e', '')) AS count_of_e FROM dual;
+
+-- 37. Write a query to find a column having index or not (data dictionary)
+--38.  Write a query to print index name , column name and its table name (data dictionary)
+SELECT uic.index_name, uic.column_name, uic.table_name
+FROM user_ind_columns uic
+JOIN user_indexes ui
+  ON uic.index_name = ui.index_name
+WHERE uic.table_name = 'EMPLOYEES';
+
+--39.  write a query to list table names and its record count  (data dictionary) 
+SELECT table_name, num_rows
+FROM user_tables;
+
+--40. write a query to list child table names from the given table name (data dictionary)
+--41.  write a query to find a column having constraint or not ? (data dictionary) 
+SELECT 
+    c.COLUMN_NAME,
+    cc.CONSTRAINT_NAME,
+    c.DATA_TYPE,
+    c.DATA_LENGTH
+FROM 
+    USER_TAB_COLUMNS c
+LEFT JOIN 
+    USER_CONS_COLUMNS cc ON c.COLUMN_NAME = cc.COLUMN_NAME 
+    AND c.TABLE_NAME = cc.TABLE_NAME
+WHERE 
+    c.TABLE_NAME = 'EMPLOYEES'
+ORDER BY 
+    c.COLUMN_NAME;
+
+--42. write a query to find gt tables from user_Tables  (data dictionary)
+SELECT 
+    TABLE_NAME
+FROM 
+    USER_TABLES
+WHERE 
+    TABLE_NAME LIKE 'GT%'
+ORDER BY 
+    TABLE_NAME;
+    
+--43. write a query to find exernal tables from user_Tables  (data dictionary) 
+SELECT TABLE_NAME
+FROM USER_EXTERNAL_TABLES
+ORDER BY TABLE_NAME;
+
+--44. What is output for Inner join, left , right, full outer and cross join 
+-- Create table t9 and insert values
+CREATE TABLE t9 (
+    id NUMBER
+);
+
+INSERT INTO t9 (id) VALUES (1);
+INSERT INTO t9 (id) VALUES (2);
+INSERT INTO t9 (id) VALUES (3);
+INSERT INTO t9 (id) VALUES (4);
+INSERT INTO t9 (id) VALUES (5);
+INSERT INTO t9 (id) VALUES (6);
+
+-- Create table t10 (no records)
+CREATE TABLE t10 (
+    id NUMBER
+);
+
+--INNER JOIN
+SELECT *
+FROM t9
+INNER JOIN t10 ON t9.id = t10.id;
+
+--LEFT JOIN
+SELECT *
+FROM t9
+LEFT JOIN t10 ON t9.id = t10.id;
+
+--RIGHT JOIN
+SELECT *
+FROM t9
+RIGHT JOIN t10 ON t9.id = t10.id;
+
+--FULL OUTER JOIN
+SELECT *
+FROM t9
+FULL OUTER JOIN t10 ON t9.id = t10.id;
+
+--CROSS JOIN
+SELECT *
+FROM t9
+CROSS JOIN t10;
+
+--45. print employee names who are all getting salary higher than their manager.
+SELECT e.FIRST_NAME, e.LAST_NAME
+FROM EMPLOYEES e
+JOIN EMPLOYEES m ON e.MANAGER_ID = m.EMPLOYEE_ID
+WHERE e.SALARY > m.SALARY;
+
+--46. print employees who are all having more experience from their own manager.
+SELECT 
+    e.FIRST_NAME,
+    e.LAST_NAME,
+    e.HIRE_DATE AS EMPLOYEE_HIRE_DATE,
+    m.FIRST_NAME AS MANAGER_FIRST_NAME,
+    m.LAST_NAME AS MANAGER_LAST_NAME,
+    m.HIRE_DATE AS MANAGER_HIRE_DATE
+FROM EMPLOYEES e
+JOIN EMPLOYEES m ON e.MANAGER_ID = m.EMPLOYEE_ID
+WHERE e.HIRE_DATE < m.HIRE_DATE;  -- Employee hired before the manager
+
+--47.  Print employee details only for active employees 
+SELECT e.EMPLOYEE_ID, e.first_name AS active_employee_name, j.END_DATE
+FROM EMPLOYEES e 
+JOIN JOB_HISTORY j ON e.EMPLOYEE_ID = j.EMPLOYEE_ID 
+WHERE END_DATE >= SYS_DATE
+ORDER BY j.END_DATE DESC;
+
+SELECT e.EMPLOYEE_ID, e.first_name AS active_employee_name, j.END_DATE
+FROM EMPLOYEES e 
+JOIN JOB_HISTORY j ON e.EMPLOYEE_ID = j.EMPLOYEE_ID 
+WHERE j.END_DATE >= TRUNC(SYSDATE, 'YYYY') - INTERVAL '1' YEAR 
+  AND j.END_DATE < TRUNC(SYSDATE, 'YYYY') + INTERVAL '1' YEAR
+ORDER BY j.END_DATE DESC;
+
+--48. 
+select eid,ename,did,dname,loc_name
+from t1 e inner join t2 e1
+on e.did=e1.did
+left join locations t3 l
+on l.loc_id=e1.loc_id;
+
+--49.write query to release all cars in all colurs   
+select * from car cross join colour;
+--50.output
+--Select (2,10 ) From dual;
+SELECT 2 AS column1, 10 AS column2 FROM dual;
+
+
 
